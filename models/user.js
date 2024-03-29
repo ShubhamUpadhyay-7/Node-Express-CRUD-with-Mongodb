@@ -1,34 +1,80 @@
-const { ObjectId } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
-class User {
-  constructor(db) {
-    this.collection = db.collection("users");
-  }
+const url = "mongodb://localhost:27017";
+const dbName = "node-crud";
 
-  async findAll() {
-    return this.collection.find({}).toArray();
-  }
-
-  async findById(id) {
-    return this.collection.findOne({ _id: ObjectId(id) });
-  }
-
-  async create(user) {
-    return this.collection.insertOne(user);
-  }
-
-  async update(id, updatedFields) {
-    return this.collection.updateOne(
-      {
-        _id: ObjectId(id),
-      },
-      { $set: updatedFields }
-    );
-  }
-
-  async delete(id) {
-    return this.collection.deleteOne({ _id: ObjectId(id) });
-  }
+async function findAll() {
+  const client = new MongoClient(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  await client.connect();
+  const db = client.db(dbName);
+  const users = await db.collection("users").find({}).toArray();
+  console.log(users);
+  client.close();
+  return users;
 }
 
-module.exports = User;
+async function findById(id) {
+  const client = new MongoClient(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  await client.connect();
+  const db = client.db(dbName);
+  const user = await db.collection("users").findOne({ _id: new ObjectId(id) });
+  console.log(user);
+  client.close();
+  return user;
+}
+
+async function create(user) {
+  const client = new MongoClient(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  await client.connect();
+  const db = client.db(dbName);
+  const createdUser = await db.collection("users").insertOne(user);
+  client.close();
+  return createdUser;
+}
+
+async function update(id, updatedFields) {
+  const client = new MongoClient(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  await client.connect();
+  const db = client.db(dbName);
+  const updatedUser = await db.collection("users").updateOne(
+    {
+      _id: new ObjectId(id),
+    },
+    { $set: updatedFields }
+  );
+  client.close();
+  return updatedUser;
+}
+
+async function del(id) {
+  const client = new MongoClient(url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  await client.connect();
+  const db = client.db(dbName);
+  const user = await db
+    .collection("users")
+    .deleteOne({ _id: new ObjectId(id) });
+  client.close();
+  return user;
+}
+module.exports = {
+  findAll,
+  findById,
+  create,
+  update,
+  del,
+};

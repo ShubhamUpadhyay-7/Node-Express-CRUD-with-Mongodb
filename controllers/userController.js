@@ -1,12 +1,10 @@
 const { ObjectId } = require("mongodb");
-const User = require("../models/user");
-const db = require("../app").db;
-
-const user = new User(db);
+const user = require("../models/user");
 
 async function getAllUsers(req, res) {
   try {
     const users = await user.findAll();
+    console.log(users);
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -16,12 +14,12 @@ async function getAllUsers(req, res) {
 async function getUserById(req, res) {
   try {
     const id = req.params.id;
-    const user = await user.findById(id);
-    if (!user) {
+    const user1 = await user.findById(id);
+    if (!user1) {
       res.status(404).json({ message: "User not found" });
       return;
     }
-    res.json(user);
+    res.json(user1);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -30,6 +28,7 @@ async function getUserById(req, res) {
 async function createUser(req, res) {
   try {
     const newUser = req.body;
+    newUser._id = new ObjectId();
     await user.create(newUser);
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
@@ -51,7 +50,7 @@ async function updateUser(req, res) {
 async function deleteUser(req, res) {
   try {
     const id = req.params.id;
-    await user.delete(id);
+    await user.del(id);
     res.json({ message: "User deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
